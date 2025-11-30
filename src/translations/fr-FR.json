@@ -1,0 +1,22 @@
+{
+  "wwchat": {
+    "common_appName": {
+      "full": "WeWard Chat",
+      "initials": "WWC"
+    },
+    "common_error": "Quelque chose s'est mal passé.",
+    "screen_chat": {
+      "hello_user": "Salut, je m'appelle {{name}}",
+      "title": "Bienvenue sur $t(common_appName.full)",
+      "description": "Vous voulez découvrir des fonctionnalités ? Cliquez sur l'un des trois boutons en bas de l'écran. Le premier vous permet d'appeler une API REST. Le deuxième de changer la couleur du thème. Et le troisième de changer la langue"
+    },
+    "screen_chats": {
+      "title": "Chats"
+    },
+    "error_boundary": {
+      "title": "Oups ! Quelque chose s'est mal passé.",
+      "description": "Nous sommes désolés pour le désagrément. Veuillez réessayer plus tard.",
+      "cta": "Recharger l'écran"
+    }
+  }
+}
