@@ -60,7 +60,7 @@ function UserList({ navigation }: RootScreenProps<Paths.UserList>) {
       <View style={[layout.flex_1, gutters.paddingTop_16]}>
         <View style={[gutters.paddingHorizontal_16, gutters.marginBottom_16]}>
           <Text style={[fonts.size_24, fonts.bold, fonts.gray800]}>
-            {t('screen_chats.title', 'Select a user to chat')}
+            {t('screen_chats.title')}
           </Text>
         </View>
         <FlatList
@@ -110,7 +110,7 @@ function UserListItem({
     >
       <View style={[layout.relative]}>
         <Image
-          source={{ uri: avatar ?? 'https://via.placeholder.com/200' }}
+          source={{ uri: avatar }}
           style={[
             {
               borderRadius: 28,
