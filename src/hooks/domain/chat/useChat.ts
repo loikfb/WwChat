@@ -93,6 +93,40 @@ export const useChat = () => {
         );
       },
       onMessage: (message: MessageEvent) => {
+        // First, optimistically update threads cache
+        // This must happen BEFORE we update messages to avoid race conditions
+        queryClient.setQueryData<Thread[]>(
+          [ChatQueryKey.threads],
+          (old = []) => {
+            // Check if thread already exists
+            if (old.some((t) => t.id === message.threadId)) {
+              // Update existing thread's last message
+              return old.map((t) =>
+                t.id === message.threadId
+                  ? {
+                      ...t,
+                      lastMessage: message.text,
+                      lastMessageAt: message.timestamp,
+                    }
+                  : t,
+              );
+            }
+
+            // Add new thread (for new conversations)
+            const newThread: Thread = {
+              createdAt: message.timestamp,
+              id: message.threadId,
+              lastMessage: message.text,
+              lastMessageAt: message.timestamp,
+              participants: [message.senderId, message.receiverId].sort(),
+            };
+            return [...old, newThread].sort(
+              (a, b) =>
+                new Date(b.lastMessageAt).getTime() -
+                new Date(a.lastMessageAt).getTime(),
+            );
+          },
+        );
         // Update messages cache
         queryClient.setQueryData<Message[]>(
           [ChatQueryKey.messages, message.threadId],
@@ -108,6 +142,12 @@ export const useChat = () => {
             );
           },
         );
+
+        // Invalidate threads to sync with server in background
+        void queryClient.invalidateQueries({
+          queryKey: [ChatQueryKey.threads],
+          refetchType: 'none',
+        });
       },
       onMessageSent: (message: MessageEvent) => {
         // First, optimistically update threads cache
@@ -162,6 +202,7 @@ export const useChat = () => {
         // Invalidate threads to sync with server in background
         void queryClient.invalidateQueries({
           queryKey: [ChatQueryKey.threads],
+          refetchType: 'none',
         });
       },
     });
