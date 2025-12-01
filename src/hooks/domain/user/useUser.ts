@@ -20,6 +20,7 @@ const useUsersQuery = () =>
   useQuery({
     queryFn: UserServices.fetchAll,
     queryKey: [UserQueryKey.users],
+    select: (data) => data.filter((user) => user.id !== CURRENT_USER_ID), // Filter out the current user
   });
 
 const useUserQuery = (id: string) =>

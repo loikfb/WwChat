@@ -27,13 +27,9 @@ type UserListItemProps = {
 
 function UserList({ navigation }: RootScreenProps<Paths.UserList>) {
   const { t } = useTranslation();
-  const { getCurrentUserId, useUsersQuery } = useUser();
+  const { useUsersQuery } = useUser();
   const { fonts, gutters, layout } = useTheme();
   const { data: users, isError, isLoading } = useUsersQuery();
-  const currentUserId = getCurrentUserId();
-
-  const filteredUsers =
-    users?.filter((user) => user.id !== currentUserId) ?? [];
 
   const handleUserPress = (userId: string) => {
     navigation.navigate(Paths.Chat, { userId });
@@ -68,7 +64,7 @@ function UserList({ navigation }: RootScreenProps<Paths.UserList>) {
           </Text>
         </View>
         <FlatList
-          data={filteredUsers}
+          data={users}
           keyExtractor={(item) => item.id}
           renderItem={({ item }) => (
             <UserListItem
