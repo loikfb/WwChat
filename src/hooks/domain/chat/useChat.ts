@@ -161,7 +161,7 @@ export const useChat = () => {
 
         // Invalidate threads to sync with server in background
         void queryClient.invalidateQueries({
-          queryKey: [ChatQueryKey.threads]
+          queryKey: [ChatQueryKey.threads],
         });
       },
     });
