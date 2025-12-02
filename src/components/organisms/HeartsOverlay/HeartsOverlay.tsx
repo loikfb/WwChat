@@ -12,10 +12,10 @@ import Animated, {
 const { height: SCREEN_HEIGHT, width: SCREEN_WIDTH } = Dimensions.get('window');
 
 type HeartAnimation = {
+  readonly delay: number;
   readonly id: string;
   readonly rotation: number;
   readonly x: number;
-  readonly delay: number;
 };
 
 type HeartsOverlayProps = {
@@ -25,7 +25,9 @@ type HeartsOverlayProps = {
 
 const HEART_COUNT = 100;
 const ANIMATION_DURATION = 4000;
+const ANIMATION_DURATION_OFFSET = 600;
 const HALF = 0.5;
+const EASE_BACK_FACTOR = 1.5;
 const SCREEN_HEIGHT_OFFSET = 100;
 const SCALE_MAX = 1.2;
 const SCALE_MIN = 0.6;
@@ -35,7 +37,7 @@ const ROTATION_RANGE = 80;
 const MAX_STAGGER_DELAY = 2000;
 const OPACITY_FADE_START = 0.3;
 
-function FloatingHeart({ rotation, x, delay }: Omit<HeartAnimation, 'id'>) {
+function FloatingHeart({ delay, rotation, x }: Omit<HeartAnimation, 'id'>) {
   const translateY = useSharedValue(0);
   const opacity = useSharedValue(0);
   const scale = useSharedValue(SCALE_MIN);
@@ -47,45 +49,50 @@ function FloatingHeart({ rotation, x, delay }: Omit<HeartAnimation, 'id'>) {
         duration: ANIMATION_DURATION,
         easing: Easing.out(Easing.quad),
       });
-      
+
       scale.value = withSequence(
         withTiming(1, {
           duration: 300,
-          easing: Easing.out(Easing.back(1.5)),
+          easing: Easing.out(Easing.back(EASE_BACK_FACTOR)),
         }),
         withTiming(SCALE_MAX, {
-          duration: ANIMATION_DURATION - 600,
+          duration: ANIMATION_DURATION - ANIMATION_DURATION_OFFSET,
           easing: Easing.inOut(Easing.ease),
         }),
-        withTiming(SCALE_MIN, { 
+        withTiming(SCALE_MIN, {
           duration: 300,
           easing: Easing.in(Easing.ease),
         }),
       );
-      
+
       opacity.value = withTiming(1, {
         duration: 200,
         easing: Easing.out(Easing.ease),
       });
     }, delay);
 
-    return () => clearTimeout(timer);
+    return () => {
+      clearTimeout(timer);
+    };
   }, [opacity, scale, translateY, delay]);
 
   const animatedStyle = useAnimatedStyle(() => {
     // Calculate opacity based on vertical position (fade from bottom to top)
-    const progress = Math.abs(translateY.value) / (SCREEN_HEIGHT + SCREEN_HEIGHT_OFFSET);
-    const fadeOpacity = progress < OPACITY_FADE_START 
-      ? 1 
-      : 1 - ((progress - OPACITY_FADE_START) / (1 - OPACITY_FADE_START));
-    
+    const progress =
+      Math.abs(translateY.value) / (SCREEN_HEIGHT + SCREEN_HEIGHT_OFFSET);
+    const fadeOpacity =
+      progress < OPACITY_FADE_START
+        ? 1
+        : 1 - (progress - OPACITY_FADE_START) / (1 - OPACITY_FADE_START);
+
     return {
       opacity: opacity.value * fadeOpacity,
       transform: [
         { translateY: translateY.value },
         {
           translateX:
-            Math.sin(translateY.value / SINE_WAVE_DIVISOR) * SINE_WAVE_AMPLITUDE,
+            Math.sin(translateY.value / SINE_WAVE_DIVISOR) *
+            SINE_WAVE_AMPLITUDE,
         },
         { rotate: `${rotation}deg` },
         { scale: scale.value },
@@ -100,7 +107,7 @@ function FloatingHeart({ rotation, x, delay }: Omit<HeartAnimation, 'id'>) {
           fontSize: 24,
           left: x,
           position: 'absolute',
-          top: SCREEN_HEIGHT + 20,
+          top: SCREEN_HEIGHT + SCREEN_HEIGHT_OFFSET,
         },
         animatedStyle,
       ]}
@@ -153,10 +160,10 @@ function HeartsOverlay({ onAnimationComplete, visible }: HeartsOverlayProps) {
     >
       {hearts.map((heart) => (
         <FloatingHeart
+          delay={heart.delay}
           key={heart.id}
           rotation={heart.rotation}
           x={heart.x}
-          delay={heart.delay}
         />
       ))}
     </GestureHandlerRootView>

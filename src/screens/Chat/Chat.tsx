@@ -14,7 +14,13 @@ import {
   View,
 } from 'react-native';
 
-import { type Heart, HeartEvent, type Message, useChat, useUser } from '@/hooks';
+import {
+  type Heart,
+  HeartEvent,
+  type Message,
+  useChat,
+  useUser,
+} from '@/hooks';
 import { Paths } from '@/navigation/paths';
 import { useTheme } from '@/theme';
 
