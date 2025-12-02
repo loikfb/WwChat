@@ -27,9 +27,19 @@ type UserListItemProps = {
 
 function UserList({ navigation }: RootScreenProps<Paths.UserList>) {
   const { t } = useTranslation();
-  const { useUsersQuery } = useUser();
-  const { fonts, gutters, layout } = useTheme();
+  const { getCurrentUserId, useUserQuery, useUsersQuery } = useUser();
+  const { changeTheme, components, fonts, gutters, layout, variant } =
+    useTheme();
   const { data: users, isError, isLoading } = useUsersQuery();
+
+  const currentUserId = getCurrentUserId();
+  const { data: currentUser } = useUserQuery(currentUserId);
+
+  const handleProfilePress = () => {
+    // TODO: Navigate to user profile
+    console.log('Current user avatar pressed');
+    changeTheme(variant === 'default' ? 'dark' : 'default');
+  };
 
   const handleUserPress = (userId: string) => {
     navigation.navigate(Paths.Chat, { userId });
@@ -58,10 +68,27 @@ function UserList({ navigation }: RootScreenProps<Paths.UserList>) {
   return (
     <SafeScreen>
       <View style={[layout.flex_1, gutters.paddingTop_16]}>
-        <View style={[gutters.paddingHorizontal_16, gutters.marginBottom_16]}>
+        {/* Header */}
+        <View
+          style={[
+            layout.row,
+            layout.itemsCenter,
+            layout.justifyBetween,
+            gutters.paddingHorizontal_16,
+            gutters.marginBottom_16,
+          ]}
+        >
           <Text style={[fonts.size_24, fonts.bold, fonts.gray800]}>
             {t('screen_chats.title')}
           </Text>
+          {currentUser ? (
+            <TouchableOpacity onPress={handleProfilePress}>
+              <Image
+                source={{ uri: currentUser.avatar }}
+                style={components.buttonCircle}
+              />
+            </TouchableOpacity>
+          ) : undefined}
         </View>
         <FlatList
           data={users}
@@ -103,7 +130,7 @@ function UserListItem({
         gutters.paddingHorizontal_16,
         gutters.paddingVertical_12,
         {
-          borderBottomColor: colors.gray100,
+          borderBottomColor: colors.secondary,
           borderBottomWidth: 1,
         },
       ]}
@@ -156,7 +183,7 @@ function UserListItem({
               style={[
                 fonts.size_12,
                 fonts.gray200,
-                backgrounds.gray100,
+                backgrounds.secondary,
                 gutters.paddingHorizontal_12,
                 gutters.paddingVertical_12,
                 borders.rounded_4,

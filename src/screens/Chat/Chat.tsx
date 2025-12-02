@@ -198,8 +198,8 @@ function Chat({ navigation, route }: RootScreenProps<Paths.Chat>) {
             gutters.paddingHorizontal_16,
             gutters.paddingVertical_12,
             {
-              backgroundColor: colors.secondary,
-              borderBottomColor: colors.gray100,
+              backgroundColor: colors.primary,
+              borderBottomColor: colors.secondary,
               borderBottomWidth: 1,
             },
           ]}
@@ -309,8 +309,8 @@ function Chat({ navigation, route }: RootScreenProps<Paths.Chat>) {
             gutters.paddingHorizontal_16,
             gutters.paddingVertical_12,
             {
-              backgroundColor: colors.gray50,
-              borderTopColor: colors.gray100,
+              backgroundColor: colors.primary,
+              borderTopColor: colors.secondary,
               borderTopWidth: 1,
             },
           ]}
@@ -327,7 +327,7 @@ function Chat({ navigation, route }: RootScreenProps<Paths.Chat>) {
               layout.flex_1,
               fonts.size_16,
               fonts.gray800,
-              backgrounds.gray100,
+              backgrounds.secondary,
               gutters.paddingHorizontal_16,
               gutters.paddingVertical_12,
               {
@@ -342,14 +342,14 @@ function Chat({ navigation, route }: RootScreenProps<Paths.Chat>) {
             onPress={handleSendMessage}
             style={[
               gutters.marginLeft_12,
+              layout.justifyCenter,
               {
                 alignItems: 'center',
                 backgroundColor: messageText.trim()
                   ? colors.tintColor
-                  : colors.placeholder,
+                  : colors.secondary,
                 borderRadius: 22,
                 height: 44,
-                justifyContent: 'center',
                 width: 44,
               },
             ]}

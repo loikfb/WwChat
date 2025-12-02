@@ -109,7 +109,7 @@ function MessageBubble({
         <View
           style={[
             {
-              backgroundColor: isOwn ? colors.tintColor : colors.gray100,
+              backgroundColor: isOwn ? colors.tintColor : colors.secondary,
               borderRadius: 16,
               paddingHorizontal: 12,
               paddingVertical: 8,
@@ -193,7 +193,7 @@ function MessageBubble({
                       style={[
                         fonts.size_12,
                         {
-                          color: isOwn ? colors.gray50 : colors.gray800,
+                          color: isOwn ? colors.gray50 : colors.secondaryLabel,
                           marginLeft: 2,
                         },
                       ]}

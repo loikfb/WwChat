@@ -10,13 +10,12 @@ const generateComponentStyles = ({
 }: ComponentTheme) => {
   return {
     buttonCircle: {
-      ...layout.justifyCenter,
       ...layout.itemsCenter,
-      ...backgrounds.purple100,
+      ...backgrounds.tintColor,
       ...fonts.gray400,
-      borderRadius: 35,
-      height: 64,
-      width: 64,
+      borderRadius: 20,
+      height: 40,
+      width: 40,
     },
     circle250: {
       borderRadius: 140,
