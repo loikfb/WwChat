@@ -57,11 +57,9 @@ const useHeartsQuery = (messageId: string) =>
 export const useChat = () => {
   const queryClient = useQueryClient();
 
-  // Setup WebSocket listeners
-  // WebSocket is initialized as singleton in App.tsx
   useEffect(() => {
-    // Setup WebSocket listeners for chat events
-    webSocketService.setListeners({
+    // Register listeners for chat events
+    webSocketService.registerListenersOnce('chat', {
       onHeart: (heart: HeartEvent) => {
         // Update hearts cache
         queryClient.setQueryData<Heart[]>(

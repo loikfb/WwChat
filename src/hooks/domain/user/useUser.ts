@@ -33,11 +33,9 @@ const useUserQuery = (id: string) =>
 export const useUser = () => {
   const queryClient = useQueryClient();
 
-  // Setup WebSocket listener for user online status updates
-  // WebSocket is initialized as singleton in App.tsx
   useEffect(() => {
-    // Setup WebSocket listener for user online status
-    webSocketService.setListeners({
+    // Register listeners for user events
+    webSocketService.registerListenersOnce('user', {
       onUserOnline: (event: UserOnlineEvent) => {
         // Update user online status
         queryClient.setQueryData<User>(
