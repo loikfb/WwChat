@@ -268,7 +268,7 @@ function Chat({ navigation, route }: RootScreenProps<Paths.Chat>) {
             ) : (
               <View style={[layout.itemsCenter, gutters.marginTop_40]}>
                 <Text style={[fonts.size_16, fonts.gray200]}>
-                  {t('screen_chat.no_messages', 'No messages yet')}
+                  {t('screen_chat.no_messages')}
                 </Text>
               </View>
             )
