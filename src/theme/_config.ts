@@ -59,8 +59,8 @@ export const config = {
   gutters: sizes,
   navigationColors: {
     ...DefaultTheme.colors,
-    background: colorsLight.gray50,
-    card: colorsLight.gray50,
+    background: colorsLight.primary,
+    card: colorsLight.secondary,
   },
   variants: {
     dark: {
