@@ -36,8 +36,7 @@ function UserList({ navigation }: RootScreenProps<Paths.UserList>) {
   const { data: currentUser } = useUserQuery(currentUserId);
 
   const handleProfilePress = () => {
-    // TODO: Navigate to user profile
-    console.log('Current user avatar pressed');
+    // TODO: Navigate to user profile screen with change theme feature
     changeTheme(variant === 'default' ? 'dark' : 'default');
   };
 
