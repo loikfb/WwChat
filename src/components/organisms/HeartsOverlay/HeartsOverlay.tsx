@@ -15,7 +15,7 @@ type HeartAnimation = {
   readonly id: string;
   readonly rotation: number;
   readonly x: number;
-  readonly y: number;
+  readonly delay: number;
 };
 
 type HeartsOverlayProps = {
@@ -23,61 +23,75 @@ type HeartsOverlayProps = {
   readonly visible: boolean;
 };
 
-const HEART_COUNT = 30;
-const ANIMATION_DURATION = 3000;
+const HEART_COUNT = 100;
+const ANIMATION_DURATION = 4000;
 const HALF = 0.5;
 const SCREEN_HEIGHT_OFFSET = 100;
-const ANIMATION_DURATION_OFFSET_600 = 600;
-const ANIMATION_DURATION_OFFSET_400 = 400;
-const ANIMATION_INITIAL_DURATION = 200;
-const ANIMATION_EASE_IN_DURATION = 300;
 const SCALE_MAX = 1.2;
-const SCALE_MIN = 0.8;
-const SINE_WAVE_DIVISOR = 50;
-const SINE_WAVE_AMPLITUDE = 50;
-const ROTATION_RANGE = 60;
+const SCALE_MIN = 0.6;
+const SINE_WAVE_DIVISOR = 40;
+const SINE_WAVE_AMPLITUDE = 40;
+const ROTATION_RANGE = 80;
+const MAX_STAGGER_DELAY = 2000;
+const OPACITY_FADE_START = 0.3;
 
-function FloatingHeart({ rotation, x, y }: Omit<HeartAnimation, 'id'>) {
+function FloatingHeart({ rotation, x, delay }: Omit<HeartAnimation, 'id'>) {
   const translateY = useSharedValue(0);
-  const opacity = useSharedValue(1);
-  const scale = useSharedValue(HALF);
+  const opacity = useSharedValue(0);
+  const scale = useSharedValue(SCALE_MIN);
 
   useEffect(() => {
-    translateY.value = withTiming(-SCREEN_HEIGHT - SCREEN_HEIGHT_OFFSET, {
-      duration: ANIMATION_DURATION,
-      easing: Easing.out(Easing.ease),
-    });
-    opacity.value = withSequence(
-      withTiming(1, { duration: ANIMATION_INITIAL_DURATION }),
-      withTiming(1, {
-        duration: ANIMATION_DURATION - ANIMATION_DURATION_OFFSET_600,
-      }),
-      withTiming(0, { duration: ANIMATION_DURATION_OFFSET_400 }),
-    );
-    scale.value = withSequence(
-      withTiming(1, {
-        duration: ANIMATION_EASE_IN_DURATION,
+    // Staggered start with delay
+    const timer = setTimeout(() => {
+      translateY.value = withTiming(-SCREEN_HEIGHT - SCREEN_HEIGHT_OFFSET, {
+        duration: ANIMATION_DURATION,
+        easing: Easing.out(Easing.quad),
+      });
+      
+      scale.value = withSequence(
+        withTiming(1, {
+          duration: 300,
+          easing: Easing.out(Easing.back(1.5)),
+        }),
+        withTiming(SCALE_MAX, {
+          duration: ANIMATION_DURATION - 600,
+          easing: Easing.inOut(Easing.ease),
+        }),
+        withTiming(SCALE_MIN, { 
+          duration: 300,
+          easing: Easing.in(Easing.ease),
+        }),
+      );
+      
+      opacity.value = withTiming(1, {
+        duration: 200,
         easing: Easing.out(Easing.ease),
-      }),
-      withTiming(SCALE_MAX, {
-        duration: ANIMATION_DURATION - ANIMATION_DURATION_OFFSET_400,
-      }),
-      withTiming(SCALE_MIN, { duration: ANIMATION_EASE_IN_DURATION }),
-    );
-  }, [opacity, scale, translateY]);
+      });
+    }, delay);
 
-  const animatedStyle = useAnimatedStyle(() => ({
-    opacity: opacity.value,
-    transform: [
-      { translateY: translateY.value },
-      {
-        translateX:
-          Math.sin(translateY.value / SINE_WAVE_DIVISOR) * SINE_WAVE_AMPLITUDE,
-      },
-      { rotate: `${rotation}deg` },
-      { scale: scale.value },
-    ],
-  }));
+    return () => clearTimeout(timer);
+  }, [opacity, scale, translateY, delay]);
+
+  const animatedStyle = useAnimatedStyle(() => {
+    // Calculate opacity based on vertical position (fade from bottom to top)
+    const progress = Math.abs(translateY.value) / (SCREEN_HEIGHT + SCREEN_HEIGHT_OFFSET);
+    const fadeOpacity = progress < OPACITY_FADE_START 
+      ? 1 
+      : 1 - ((progress - OPACITY_FADE_START) / (1 - OPACITY_FADE_START));
+    
+    return {
+      opacity: opacity.value * fadeOpacity,
+      transform: [
+        { translateY: translateY.value },
+        {
+          translateX:
+            Math.sin(translateY.value / SINE_WAVE_DIVISOR) * SINE_WAVE_AMPLITUDE,
+        },
+        { rotate: `${rotation}deg` },
+        { scale: scale.value },
+      ],
+    };
+  });
 
   return (
     <Animated.Text
@@ -86,7 +100,7 @@ function FloatingHeart({ rotation, x, y }: Omit<HeartAnimation, 'id'>) {
           fontSize: 24,
           left: x,
           position: 'absolute',
-          top: y,
+          top: SCREEN_HEIGHT + 20,
         },
         animatedStyle,
       ]}
@@ -99,9 +113,11 @@ function FloatingHeart({ rotation, x, y }: Omit<HeartAnimation, 'id'>) {
 function HeartsOverlay({ onAnimationComplete, visible }: HeartsOverlayProps) {
   useEffect(() => {
     if (visible) {
+      // Total animation time = max stagger delay + animation duration
+      const totalDuration = MAX_STAGGER_DELAY + ANIMATION_DURATION;
       const timer = setTimeout(() => {
         onAnimationComplete();
-      }, ANIMATION_DURATION);
+      }, totalDuration);
       return () => {
         clearTimeout(timer);
       };
@@ -118,7 +134,8 @@ function HeartsOverlay({ onAnimationComplete, visible }: HeartsOverlayProps) {
       id: `heart-${index}`,
       rotation: (Math.random() - HALF) * ROTATION_RANGE,
       x: Math.random() * SCREEN_WIDTH,
-      y: Math.random() * SCREEN_HEIGHT,
+      // Stagger the start time of each heart
+      delay: Math.random() * MAX_STAGGER_DELAY,
     }),
   );
 
@@ -139,7 +156,7 @@ function HeartsOverlay({ onAnimationComplete, visible }: HeartsOverlayProps) {
           key={heart.id}
           rotation={heart.rotation}
           x={heart.x}
-          y={heart.y}
+          delay={heart.delay}
         />
       ))}
     </GestureHandlerRootView>
