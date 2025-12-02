@@ -31,6 +31,10 @@ class WebSocketService {
   private socket: Socket | undefined = undefined;
   private status: WebSocketStatus = 'disconnected';
   private wsUrl: string;
+  // Support multiple subscribers for specific events
+  private heartReceivedSubscribers: ((heart: HeartEvent) => void)[] = [];
+  // Track which listener groups have been registered to avoid duplicates
+  private registeredListenerGroups = new Set<string>();
 
   constructor() {
     this.wsUrl = process.env.WS_URL ?? 'ws://localhost:3002';
@@ -135,6 +139,40 @@ class WebSocketService {
     this.listeners = { ...this.listeners, ...listeners };
   }
 
+  /**
+   * Register a group of listeners only once
+   * @param groupKey - Unique identifier for this group of listeners
+   * @param listeners - The listeners to register
+   * @returns true if registered, false if already registered
+   */
+  registerListenersOnce(
+    groupKey: string,
+    listeners: Partial<WebSocketListeners>,
+  ): boolean {
+    if (this.registeredListenerGroups.has(groupKey)) {
+      return false;
+    }
+
+    this.registeredListenerGroups.add(groupKey);
+    this.setListeners(listeners);
+    return true;
+  }
+
+  /**
+   * Subscribe to heart received events
+   * @returns Cleanup function to unsubscribe
+   */
+  subscribeToHeartReceived(callback: (heart: HeartEvent) => void) {
+    this.heartReceivedSubscribers.push(callback);
+
+    return () => {
+      const index = this.heartReceivedSubscribers.indexOf(callback);
+      if (index !== -1) {
+        this.heartReceivedSubscribers.splice(index, 1);
+      }
+    };
+  }
+
   private setupEventListeners(userId: string) {
     if (!this.socket) return;
 
@@ -165,6 +203,10 @@ class WebSocketService {
 
     this.socket.on('heart', (heart: HeartEvent) => {
       this.listeners.onHeart?.(heart);
+      // Notify all subscribers
+      for (const subscriber of this.heartReceivedSubscribers) {
+        subscriber(heart);
+      }
     });
 
     this.socket.on('heart_sent', (heart: HeartEvent) => {

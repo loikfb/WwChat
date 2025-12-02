@@ -239,8 +239,16 @@ export const useChat = () => {
     return webSocketService.getStatus();
   }, []);
 
+  const onHeartReceived = useCallback(
+    (callback: (heart: HeartEvent) => void) => {
+      return webSocketService.subscribeToHeartReceived(callback);
+    },
+    [],
+  );
+
   return {
     getWebSocketStatus,
+    onHeartReceived,
     sendMessage,
     sendTyping,
     toggleHeart,

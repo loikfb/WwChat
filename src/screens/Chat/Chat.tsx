@@ -14,7 +14,7 @@ import {
   View,
 } from 'react-native';
 
-import { type Heart, type Message, useChat, useUser } from '@/hooks';
+import { type Heart, HeartEvent, type Message, useChat, useUser } from '@/hooks';
 import { Paths } from '@/navigation/paths';
 import { useTheme } from '@/theme';
 
@@ -34,6 +34,7 @@ function Chat({ navigation, route }: RootScreenProps<Paths.Chat>) {
 
   const {
     getWebSocketStatus,
+    onHeartReceived,
     sendMessage,
     sendTyping,
     toggleHeart,
@@ -73,7 +74,19 @@ function Chat({ navigation, route }: RootScreenProps<Paths.Chat>) {
   // Fetch messages when threadId is available
   const messagesQueryWithThread = useMessagesQuery(threadId);
 
-  // Listen to typing events
+  // Listen to heart events to show overlay when receiving a heart
+  useEffect(() => {
+    const cleanup = onHeartReceived((heart: HeartEvent) => {
+      // Show overlay when current user receives a heart from the other user
+      if (heart.receiverId === currentUserId && heart.senderId === userId) {
+        setShowHeartsOverlay(true);
+      }
+    });
+
+    return cleanup;
+  }, [onHeartReceived, userId, currentUserId]);
+
+  // Listen to typing events to show typing indicator
   useEffect(() => {
     const handleTypingEvent = (event: {
       isTyping: boolean;
