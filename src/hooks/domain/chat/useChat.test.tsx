@@ -19,11 +19,13 @@ jest.mock('@/services/websocket', () => ({
     disconnect: jest.fn(),
     getStatus: jest.fn(() => 'connected'),
     isConnected: jest.fn(() => true),
+    registerListenersOnce: jest.fn(),
     removeHeart: jest.fn(),
     sendHeart: jest.fn(),
     sendMessage: jest.fn(),
     sendTyping: jest.fn(),
     setListeners: jest.fn(),
+    subscribeToHeartReceived: jest.fn(() => jest.fn()),
   },
 }));
 
@@ -66,7 +68,8 @@ describe('useChat Hook', () => {
       renderHook(() => useChat(), { wrapper });
 
       await waitFor(() => {
-        expect(webSocketService.setListeners).toHaveBeenCalledWith(
+        expect(webSocketService.registerListenersOnce).toHaveBeenCalledWith(
+          'chat',
           expect.objectContaining({
             onHeart: expect.any(Function),
             onHeartRemoved: expect.any(Function),
@@ -192,13 +195,14 @@ describe('useChat Hook', () => {
       renderHook(() => useChat(), { wrapper });
 
       await waitFor(() => {
-        expect(webSocketService.setListeners).toHaveBeenCalled();
+        expect(webSocketService.registerListenersOnce).toHaveBeenCalled();
       });
 
       // Get the onMessage handler
-      const setListenersCall = (webSocketService.setListeners as jest.Mock).mock
-        .calls[0][0];
-      const onMessage = setListenersCall.onMessage;
+      const registerListenersCall = (
+        webSocketService.registerListenersOnce as jest.Mock
+      ).mock.calls[0][1];
+      const onMessage = registerListenersCall.onMessage;
 
       const testMessage = {
         id: 'msg-1',
@@ -216,13 +220,14 @@ describe('useChat Hook', () => {
       renderHook(() => useChat(), { wrapper });
 
       await waitFor(() => {
-        expect(webSocketService.setListeners).toHaveBeenCalled();
+        expect(webSocketService.registerListenersOnce).toHaveBeenCalled();
       });
 
       // Get the onMessageSent handler
-      const setListenersCall = (webSocketService.setListeners as jest.Mock).mock
-        .calls[0][0];
-      const onMessageSent = setListenersCall.onMessageSent;
+      const registerListenersCall = (
+        webSocketService.registerListenersOnce as jest.Mock
+      ).mock.calls[0][1];
+      const onMessageSent = registerListenersCall.onMessageSent;
 
       const testMessage = {
         id: 'msg-1',
@@ -252,16 +257,17 @@ describe('useChat Hook', () => {
       renderHook(() => useChat(), { wrapper });
 
       await waitFor(() => {
-        expect(webSocketService.setListeners).toHaveBeenCalled();
+        expect(webSocketService.registerListenersOnce).toHaveBeenCalled();
       });
 
       // Set initial threads cache (empty)
       queryClient.setQueryData(['chatThreads'], []);
 
       // Get the onMessageSent handler
-      const setListenersCall = (webSocketService.setListeners as jest.Mock).mock
-        .calls[0][0];
-      const onMessageSent = setListenersCall.onMessageSent;
+      const registerListenersCall = (
+        webSocketService.registerListenersOnce as jest.Mock
+      ).mock.calls[0][1];
+      const onMessageSent = registerListenersCall.onMessageSent;
 
       const testMessage = {
         id: 'msg-1',
@@ -292,7 +298,7 @@ describe('useChat Hook', () => {
       renderHook(() => useChat(), { wrapper });
 
       await waitFor(() => {
-        expect(webSocketService.setListeners).toHaveBeenCalled();
+        expect(webSocketService.registerListenersOnce).toHaveBeenCalled();
       });
 
       // Set initial threads cache with existing thread
@@ -306,9 +312,10 @@ describe('useChat Hook', () => {
       queryClient.setQueryData(['chatThreads'], [existingThread]);
 
       // Get the onMessageSent handler
-      const setListenersCall = (webSocketService.setListeners as jest.Mock).mock
-        .calls[0][0];
-      const onMessageSent = setListenersCall.onMessageSent;
+      const registerListenersCall = (
+        webSocketService.registerListenersOnce as jest.Mock
+      ).mock.calls[0][1];
+      const onMessageSent = registerListenersCall.onMessageSent;
 
       const testMessage = {
         id: 'msg-2',
@@ -339,12 +346,13 @@ describe('useChat Hook', () => {
       renderHook(() => useChat(), { wrapper });
 
       await waitFor(() => {
-        expect(webSocketService.setListeners).toHaveBeenCalled();
+        expect(webSocketService.registerListenersOnce).toHaveBeenCalled();
       });
 
-      const setListenersCall = (webSocketService.setListeners as jest.Mock).mock
-        .calls[0][0];
-      const onHeart = setListenersCall.onHeart;
+      const registerListenersCall = (
+        webSocketService.registerListenersOnce as jest.Mock
+      ).mock.calls[0][1];
+      const onHeart = registerListenersCall.onHeart;
 
       const testHeart = {
         id: 'heart-1',
@@ -360,12 +368,13 @@ describe('useChat Hook', () => {
       renderHook(() => useChat(), { wrapper });
 
       await waitFor(() => {
-        expect(webSocketService.setListeners).toHaveBeenCalled();
+        expect(webSocketService.registerListenersOnce).toHaveBeenCalled();
       });
 
-      const setListenersCall = (webSocketService.setListeners as jest.Mock).mock
-        .calls[0][0];
-      const onHeartRemoved = setListenersCall.onHeartRemoved;
+      const registerListenersCall = (
+        webSocketService.registerListenersOnce as jest.Mock
+      ).mock.calls[0][1];
+      const onHeartRemoved = registerListenersCall.onHeartRemoved;
 
       const testEvent = {
         heartId: 'heart-1',

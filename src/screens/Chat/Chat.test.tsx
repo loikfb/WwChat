@@ -20,11 +20,13 @@ jest.mock('@/services/websocket', () => ({
     disconnect: jest.fn(),
     getStatus: jest.fn(() => 'connected'),
     isConnected: jest.fn(() => true),
+    registerListenersOnce: jest.fn(),
     removeHeart: jest.fn(),
     sendHeart: jest.fn(),
     sendMessage: jest.fn(),
     sendTyping: jest.fn(),
     setListeners: jest.fn(),
+    subscribeToHeartReceived: jest.fn(() => jest.fn()),
   },
 }));
 
@@ -59,6 +61,7 @@ const mockUseHeartsQuery = jest.fn<
 jest.mock('@/hooks', () => ({
   useChat: () => ({
     getWebSocketStatus: () => 'connected',
+    onHeartReceived: jest.fn(() => jest.fn()),
     sendMessage: mockSendMessage,
     sendTyping: jest.fn(),
     toggleHeart: jest.fn(),
