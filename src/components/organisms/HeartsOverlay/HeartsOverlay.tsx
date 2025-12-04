@@ -24,7 +24,7 @@ type HeartsOverlayProps = {
 };
 
 const HEART_COUNT = 100;
-const ANIMATION_DURATION = 4000;
+const ANIMATION_DURATION = 3000;
 const ANIMATION_DURATION_OFFSET = 600;
 const HALF = 0.5;
 const EASE_BACK_FACTOR = 1.5;
