@@ -7,7 +7,11 @@ import type {
   Thread,
 } from './schema';
 
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import {
+  type QueryClient,
+  useQuery,
+  useQueryClient,
+} from '@tanstack/react-query';
 import { useCallback, useEffect } from 'react';
 
 import { webSocketService, type WebSocketStatus } from '@/services/websocket';
@@ -54,6 +58,58 @@ const useHeartsQuery = (messageId: string) =>
     queryKey: [ChatQueryKey.hearts, messageId],
   });
 
+// Helper function for message update logic
+const updateMessageCaches = (
+  message: MessageEvent,
+  queryClient: QueryClient,
+) => {
+  // Update threads cache
+  queryClient.setQueryData<Thread[]>([ChatQueryKey.threads], (old = []) => {
+    if (old.some((t) => t.id === message.threadId)) {
+      return old.map((t) =>
+        t.id === message.threadId
+          ? {
+              ...t,
+              lastMessage: message.text,
+              lastMessageAt: message.timestamp,
+            }
+          : t,
+      );
+    }
+
+    const newThread: Thread = {
+      createdAt: message.timestamp,
+      id: message.threadId,
+      lastMessage: message.text,
+      lastMessageAt: message.timestamp,
+      participants: [message.senderId, message.receiverId].sort(),
+    };
+    return [...old, newThread].sort(
+      (a, b) =>
+        new Date(b.lastMessageAt).getTime() -
+        new Date(a.lastMessageAt).getTime(),
+    );
+  });
+
+  // Update messages cache
+  queryClient.setQueryData<Message[]>(
+    [ChatQueryKey.messages, message.threadId],
+    (old = []) => {
+      const filtered = old.filter((m) => m.id !== message.id);
+      return [...filtered, message].sort(
+        (a, b) =>
+          new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime(),
+      );
+    },
+  );
+
+  // Invalidate threads
+  void queryClient.invalidateQueries({
+    queryKey: [ChatQueryKey.threads],
+    refetchType: 'none',
+  });
+};
+
 export const useChat = () => {
   const queryClient = useQueryClient();
 
@@ -91,117 +147,10 @@ export const useChat = () => {
         );
       },
       onMessage: (message: MessageEvent) => {
-        // First, optimistically update threads cache
-        // This must happen BEFORE we update messages to avoid race conditions
-        queryClient.setQueryData<Thread[]>(
-          [ChatQueryKey.threads],
-          (old = []) => {
-            // Check if thread already exists
-            if (old.some((t) => t.id === message.threadId)) {
-              // Update existing thread's last message
-              return old.map((t) =>
-                t.id === message.threadId
-                  ? {
-                      ...t,
-                      lastMessage: message.text,
-                      lastMessageAt: message.timestamp,
-                    }
-                  : t,
-              );
-            }
-
-            // Add new thread (for new conversations)
-            const newThread: Thread = {
-              createdAt: message.timestamp,
-              id: message.threadId,
-              lastMessage: message.text,
-              lastMessageAt: message.timestamp,
-              participants: [message.senderId, message.receiverId].sort(),
-            };
-            return [...old, newThread].sort(
-              (a, b) =>
-                new Date(b.lastMessageAt).getTime() -
-                new Date(a.lastMessageAt).getTime(),
-            );
-          },
-        );
-        // Update messages cache
-        queryClient.setQueryData<Message[]>(
-          [ChatQueryKey.messages, message.threadId],
-          (old = []) => {
-            // Check if message already exists
-            if (old.some((m) => m.id === message.id)) {
-              return old;
-            }
-            return [...old, message].sort(
-              (a, b) =>
-                new Date(a.timestamp).getTime() -
-                new Date(b.timestamp).getTime(),
-            );
-          },
-        );
-
-        // Invalidate threads to sync with server in background
-        void queryClient.invalidateQueries({
-          queryKey: [ChatQueryKey.threads],
-          refetchType: 'none',
-        });
+        updateMessageCaches(message, queryClient);
       },
       onMessageSent: (message: MessageEvent) => {
-        // First, optimistically update threads cache
-        // This must happen BEFORE we update messages to avoid race conditions
-        queryClient.setQueryData<Thread[]>(
-          [ChatQueryKey.threads],
-          (old = []) => {
-            // Check if thread already exists
-            if (old.some((t) => t.id === message.threadId)) {
-              // Update existing thread's last message
-              return old.map((t) =>
-                t.id === message.threadId
-                  ? {
-                      ...t,
-                      lastMessage: message.text,
-                      lastMessageAt: message.timestamp,
-                    }
-                  : t,
-              );
-            }
-
-            // Add new thread (for new conversations)
-            const newThread: Thread = {
-              createdAt: message.timestamp,
-              id: message.threadId,
-              lastMessage: message.text,
-              lastMessageAt: message.timestamp,
-              participants: [message.senderId, message.receiverId].sort(),
-            };
-            return [...old, newThread].sort(
-              (a, b) =>
-                new Date(b.lastMessageAt).getTime() -
-                new Date(a.lastMessageAt).getTime(),
-            );
-          },
-        );
-
-        // Then, optimistically update messages cache
-        // This ensures the message is in cache before the query becomes enabled
-        queryClient.setQueryData<Message[]>(
-          [ChatQueryKey.messages, message.threadId],
-          (old = []) => {
-            const filtered = old.filter((m) => m.id !== message.id);
-            return [...filtered, message].sort(
-              (a, b) =>
-                new Date(a.timestamp).getTime() -
-                new Date(b.timestamp).getTime(),
-            );
-          },
-        );
-
-        // Invalidate threads to sync with server in background
-        void queryClient.invalidateQueries({
-          queryKey: [ChatQueryKey.threads],
-          refetchType: 'none',
-        });
+        updateMessageCaches(message, queryClient);
       },
     });
   }, [queryClient]);
