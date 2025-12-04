@@ -153,7 +153,8 @@ export const useChat = () => {
         // Update message in all thread caches
         queryClient.setQueriesData<Message[]>(
           { queryKey: [ChatQueryKey.messages] },
-          (old = []) => old.map(m => m.id === messageId ? { ...m, read: true } : m)
+          (old = []) =>
+            old.map((m) => (m.id === messageId ? { ...m, read: true } : m)),
         );
       },
       onMessageSent: (message: MessageEvent) => {

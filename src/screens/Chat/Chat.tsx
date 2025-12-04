@@ -131,12 +131,14 @@ function Chat({ navigation, route }: RootScreenProps<Paths.Chat>) {
   // Mark unread messages as read when they appear
   useEffect(() => {
     const unreadMessages = messagesQueryWithThread.data?.filter(
-      m => m.senderId === userId && !m.read && !sentReadReceipts.current.has(m.id)
+      (m) =>
+        m.senderId === userId && !m.read && !sentReadReceipts.current.has(m.id),
     );
-    unreadMessages?.forEach(m => {
-      sentReadReceipts.current.add(m.id);
-      webSocketService.sendMessageRead(m.id);
-    });
+    if (unreadMessages)
+      for (const m of unreadMessages) {
+        sentReadReceipts.current.add(m.id);
+        webSocketService.sendMessageRead(m.id);
+      }
   }, [messagesQueryWithThread.data, userId]);
 
   const handleSendMessage = useCallback(() => {
