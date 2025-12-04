@@ -1,6 +1,6 @@
 # WwChat - 1:1 Chat Application
 
-<div align="center" style="padding:42px">
+<div align="center" style="margin:42px">
   <img src="./src/theme/assets/images/dark/wardy.png" width="222" alt="WwChat" />
 </div>
 
@@ -49,25 +49,25 @@ yarn android # Android
 
 ### Core Requirements ✅
 
-| Feature | Status |
-|---------|--------|
-| Real-time messaging (WebSocket) | ✅ |
-| Chat bubble UI | ✅ |
-| Sender avatar, message text, timestamp | ✅ |
-| Sent/received message distinction | ✅ |
-| Message input field | ✅ |
-| Auto-scroll to latest message | ✅ |
-| Heart toggle button (per message) | ✅ |
-| Long-press heart animation (screen fill) | ✅ |
-| Heart persistence in database | ✅ |
+| Feature                                  | Status |
+| ---------------------------------------- | ------ |
+| Real-time messaging (WebSocket)          | ✅     |
+| Chat bubble UI                           | ✅     |
+| Sender avatar, message text, timestamp   | ✅     |
+| Sent/received message distinction        | ✅     |
+| Message input field                      | ✅     |
+| Auto-scroll to latest message            | ✅     |
+| Heart toggle button (per message)        | ✅     |
+| Long-press heart animation (screen fill) | ✅     |
+| Heart persistence in database            | ✅     |
 
 ### Bonus Features ✅
 
-| Feature | Status |
-|---------|--------|
-| Typing indicators | ✅ |
-| Message read receipts | ✅ |
-| Online/offline status | ✅ |
+| Feature               | Status |
+| --------------------- | ------ |
+| Typing indicators     | ✅     |
+| Message read receipts | ✅     |
+| Online/offline status | ✅     |
 
 ## Architecture
 
@@ -120,4 +120,3 @@ src/
 │   └── websocket.ts    # Socket.IO
 └── theme/              # Styling system
 ```
-
