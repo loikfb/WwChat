@@ -311,8 +311,8 @@ function Chat({ navigation, route }: RootScreenProps<Paths.Chat>) {
             <MessageWithHearts
               currentUserId={currentUserId}
               message={message}
-              onPress={handleHeartPress}
               onLongPress={handleLongPress}
+              onPress={handleHeartPress}
               otherUser={otherUser}
             />
           )}

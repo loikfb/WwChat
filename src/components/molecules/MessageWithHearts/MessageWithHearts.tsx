@@ -8,16 +8,16 @@ import MessageBubble from '@/components/molecules/MessageBubble';
 type MessageWithHeartsProps = {
   readonly currentUserId: string;
   readonly message: Message;
-  readonly onPress: (messageId: string, existingHeart?: Heart) => void;
   readonly onLongPress: (messageId: string, existingHeart?: Heart) => void;
+  readonly onPress: (messageId: string, existingHeart?: Heart) => void;
   readonly otherUser?: User;
 };
 
 function MessageWithHearts({
   currentUserId,
   message,
-  onPress,
   onLongPress,
+  onPress,
   otherUser = undefined,
 }: MessageWithHeartsProps) {
   const { useHeartsQuery } = useChat();
@@ -32,11 +32,11 @@ function MessageWithHearts({
       hearts={heartsQuery.data ?? []}
       isOwn={isOwn}
       message={message}
-      onPress={() => {
-        onPress(message.id, existingHeart);
-      }}
       onLongPress={() => {
         onLongPress(message.id, existingHeart);
+      }}
+      onPress={() => {
+        onPress(message.id, existingHeart);
       }}
       sender={isOwn ? undefined : otherUser}
     />

@@ -16,8 +16,8 @@ type MessageBubbleProps = {
   readonly hearts: Heart[];
   readonly isOwn: boolean;
   readonly message: Message;
-  readonly onPress: () => void;
   readonly onLongPress: () => void;
+  readonly onPress: () => void;
   readonly sender?: User;
   readonly showTimestamp?: boolean;
 };
@@ -49,8 +49,8 @@ function MessageBubble({
   hearts,
   isOwn,
   message,
-  onPress,
   onLongPress,
+  onPress,
   sender = undefined,
   showTimestamp = true,
 }: MessageBubbleProps) {
