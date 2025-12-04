@@ -20,7 +20,7 @@ export const queryClient = new QueryClient({
 export const storage = new MMKV();
 
 // Constants
-const CURRENT_USER_ID = process.env.CURRENT_USER_ID ?? 'a1b2c3d4'
+const CURRENT_USER_ID = process.env.CURRENT_USER_ID ?? 'a1b2c3d4';
 
 function App() {
   // Initialize WebSocket connection once at app mount

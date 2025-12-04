@@ -13,7 +13,7 @@ const enum UserQueryKey {
 }
 
 // Constants
-const CURRENT_USER_ID = process.env.CURRENT_USER_ID ?? 'a1b2c3d4'
+const CURRENT_USER_ID = process.env.CURRENT_USER_ID ?? 'a1b2c3d4';
 
 // Queries
 const useUsersQuery = () =>
