@@ -158,15 +158,12 @@ function MessageBubble({
                   {formatTimestamp(message.timestamp)}
                 </Text>
               ) : undefined}
-              {message.read ? (
+              {isOwn && message.read ? (
                 <Text
                   style={[
                     fonts.size_12,
-                    {
-                      color: isOwn
-                        ? 'rgba(255, 255, 255, 0.7)'
-                        : colors.gray200,
-                    },
+                    fonts.bold,
+                    { color: 'rgba(255, 255, 255, 0.7)' },
                   ]}
                 >
                   ✓✓

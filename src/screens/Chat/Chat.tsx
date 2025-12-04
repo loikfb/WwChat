@@ -63,6 +63,7 @@ function Chat({ navigation, route }: RootScreenProps<Paths.Chat>) {
   );
   const flatListReference = useRef<FlatList>(null);
   const typingTimeoutReference = useRef<NodeJS.Timeout | null>(null);
+  const sentReadReceipts = useRef<Set<string>>(new Set());
 
   // Derive threadId from threads query - no local state needed
   const threadId = useMemo(() => {
@@ -126,6 +127,17 @@ function Chat({ navigation, route }: RootScreenProps<Paths.Chat>) {
       }, SCROLL_DELAY_MS);
     }
   }, [messagesQueryWithThread.data]);
+
+  // Mark unread messages as read when they appear
+  useEffect(() => {
+    const unreadMessages = messagesQueryWithThread.data?.filter(
+      m => m.senderId === userId && !m.read && !sentReadReceipts.current.has(m.id)
+    );
+    unreadMessages?.forEach(m => {
+      sentReadReceipts.current.add(m.id);
+      webSocketService.sendMessageRead(m.id);
+    });
+  }, [messagesQueryWithThread.data, userId]);
 
   const handleSendMessage = useCallback(() => {
     if (!messageText.trim()) return;

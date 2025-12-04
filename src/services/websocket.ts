@@ -2,6 +2,7 @@ import type {
   HeartEvent,
   HeartRemovedEvent,
   MessageEvent,
+  MessageReadEvent,
   TypingEvent,
 } from '@/hooks/domain/chat/schema';
 import type { UserOnlineEvent } from '@/hooks/domain/user/schema';
@@ -14,6 +15,7 @@ export type WebSocketListeners = {
   onHeartRemoved: (event: HeartRemovedEvent) => void;
   onHeartSent: (heart: HeartEvent) => void;
   onMessage: (message: MessageEvent) => void;
+  onMessageRead: (event: MessageReadEvent) => void;
   onMessageSent: (message: MessageEvent) => void;
   onStatusChange: (status: WebSocketStatus) => void;
   onTyping: (event: TypingEvent) => void;
@@ -127,6 +129,13 @@ class WebSocketService {
     this.socket.emit('message', { receiverId, senderId, text });
   }
 
+  sendMessageRead(messageId: string) {
+    if (!this.socket?.connected) {
+      return;
+    }
+    this.socket.emit('message_read', { messageId });
+  }
+
   sendTyping(senderId: string, receiverId: string, isTyping: boolean) {
     if (!this.socket?.connected) {
       return;
@@ -199,6 +208,10 @@ class WebSocketService {
 
     this.socket.on('message_sent', (message: MessageEvent) => {
       this.listeners.onMessageSent?.(message);
+    });
+
+    this.socket.on('message_read', (event: MessageReadEvent) => {
+      this.listeners.onMessageRead?.(event);
     });
 
     this.socket.on('heart', (heart: HeartEvent) => {

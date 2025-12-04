@@ -42,6 +42,9 @@ export type HeartRemovedEvent = {
   messageId: string;
 };
 export type MessageEvent = Message;
+export type MessageReadEvent = {
+  messageId: string;
+};
 export type TypingEvent = {
   isTyping: boolean;
   senderId: string;
