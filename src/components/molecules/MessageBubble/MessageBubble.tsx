@@ -1,8 +1,7 @@
 import type { Heart, Message } from '@/hooks/domain/chat/schema';
 import type { User } from '@/hooks/domain/user/schema';
 
-import { useMemo } from 'react';
-import { Image, Text, TouchableOpacity, View } from 'react-native';
+import { Image, Text, View } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
   useAnimatedStyle,
@@ -14,11 +13,10 @@ import { runOnJS } from 'react-native-worklets';
 import { useTheme } from '@/theme';
 
 type MessageBubbleProps = {
-  readonly currentUserId: string;
   readonly hearts: Heart[];
   readonly isOwn: boolean;
   readonly message: Message;
-  readonly onHeartPress: () => void;
+  readonly onPress: () => void;
   readonly onLongPress: () => void;
   readonly sender?: User;
   readonly showTimestamp?: boolean;
@@ -48,11 +46,10 @@ function formatTimestamp(timestamp: string): string {
 }
 
 function MessageBubble({
-  currentUserId,
   hearts,
   isOwn,
   message,
-  onHeartPress,
+  onPress,
   onLongPress,
   sender = undefined,
   showTimestamp = true,
@@ -60,14 +57,18 @@ function MessageBubble({
   const { colors, fonts, layout } = useTheme();
   const scale = useSharedValue(1);
 
-  const hasCurrentUserHeart = useMemo(
-    () => hearts.some((h) => h.senderId === currentUserId),
-    [hearts, currentUserId],
-  );
-
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ scale: scale.value }],
   }));
+
+  const tapGesture = Gesture.Tap()
+    .onStart(() => {
+      scale.value = withSpring(SCALE_PRESSED, { damping: 15, stiffness: 300 });
+      runOnJS(onPress)();
+    })
+    .onFinalize(() => {
+      scale.value = withSpring(1, { damping: 15, stiffness: 300 });
+    });
 
   const longPressGesture = Gesture.LongPress()
     .minDuration(LONG_PRESS_DURATION)
@@ -79,8 +80,10 @@ function MessageBubble({
       scale.value = withSpring(1, { damping: 15, stiffness: 300 });
     });
 
+  const composedGesture = Gesture.Exclusive(longPressGesture, tapGesture);
+
   return (
-    <GestureDetector gesture={longPressGesture}>
+    <GestureDetector gesture={composedGesture}>
       <Animated.View
         style={[
           layout.row,
@@ -216,20 +219,6 @@ function MessageBubble({
             ]}
           />
         ) : undefined}
-        <TouchableOpacity
-          onPress={onHeartPress}
-          style={[
-            {
-              marginLeft: isOwn ? 4 : HEART_ICON_PADDING,
-              marginRight: isOwn ? HEART_ICON_PADDING : 4,
-              padding: 4,
-            },
-          ]}
-        >
-          <Text style={{ fontSize: 20 }}>
-            {hasCurrentUserHeart ? '❤️' : '🤍'}
-          </Text>
-        </TouchableOpacity>
       </Animated.View>
     </GestureDetector>
   );
